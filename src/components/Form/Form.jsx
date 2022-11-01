@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { TailSpin } from 'react-loader-spinner';
+import { toast } from 'react-toastify';
 
-import { add, getContacts } from '../../redux/contactsSlice';
+import { getContacts, addContact, isAdding } from '../../redux/contactsSlice';
 
 import { nanoid } from 'nanoid';
 import { MainForm, InputWrapper, Label, Input, Button } from './From.styled';
@@ -15,9 +17,10 @@ export default function Form() {
 
   const dispatch = useDispatch();
   const contacts = useSelector(getContacts);
+  const isPending = useSelector(isAdding);
 
   const pushDataToArr = contact => {
-    dispatch(add(contact));
+    dispatch(addContact(contact));
   };
 
   const formSubmitHandler = data => {
@@ -33,8 +36,9 @@ export default function Form() {
       return;
     }
 
-    data.id = nanoid();
     pushDataToArr(data);
+    toast.success(`Contact "${data.name}" has been succesfully added`);
+    formReset();
   };
 
   const handleChange = e => {
@@ -59,8 +63,7 @@ export default function Form() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    formSubmitHandler({ name, number });
-    formReset();
+    formSubmitHandler({ name, phone: number });
   };
 
   return (
@@ -93,7 +96,21 @@ export default function Form() {
         />
       </InputWrapper>
 
-      <Button type="submit">Add contact</Button>
+      <Button type="submit" disabled={isPending}>
+        <span>Add contact</span>
+        {isPending && (
+          <TailSpin
+            height="20"
+            width="20"
+            color="#e3e4ed"
+            ariaLabel="tail-spin-loading"
+            radius="1"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={true}
+          />
+        )}
+      </Button>
     </MainForm>
   );
 }

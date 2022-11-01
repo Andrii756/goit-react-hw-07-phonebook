@@ -1,14 +1,19 @@
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
-import { remove } from '../../redux/contactsSlice';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
+import { deleteContact } from '../../redux/contactsSlice';
+import { isLoading } from '../../redux/contactsSlice';
 import { Card, CardText, DeleteBtn } from './ContactItem.styled';
 
 const ContactItem = ({ id, name, number }) => {
   const dispatch = useDispatch();
+  const isPending = useSelector(isLoading);
 
-  const deleteContact = toDeleteId => {
-    dispatch(remove(toDeleteId));
+  const removeContact = (toDeleteId, name) => {
+    dispatch(deleteContact(toDeleteId));
+    toast.success(`Contact "${name}" has been succesfully deleted`);
   };
 
   return (
@@ -17,8 +22,12 @@ const ContactItem = ({ id, name, number }) => {
         <span>{name}: </span>
         <span>{number}</span>
       </CardText>
-      <DeleteBtn type="button" onClick={() => deleteContact(id)}>
-        Delete
+      <DeleteBtn
+        type="button"
+        disabled={isPending}
+        onClick={() => removeContact(id, name)}
+      >
+        Delete {id}
       </DeleteBtn>
     </Card>
   );
